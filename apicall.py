@@ -1,16 +1,76 @@
+#!/usr/bin/env python3
+
 import os
 import openai
 from apikey import key
+import sys
+import subprocess
+import re
+
+# Get the text following the bash command
+command_output = ' '.join(sys.argv[1:])
+
+# Save the command output as a variable
+user_question = command_output
 
 openai.api_key = key
 
-response = openai.Completion.create(
-  model="text-davinci-003",
-  prompt="I am a highly intelligent question answering bot. If you ask me a question that is rooted in truth, I will give you the answer. If you ask me a question that is nonsense, trickery, or has no clear answer, I will respond with \"Unknown\".\n\nQ: What is human life expectancy in the United States?\nA: Human life expectancy in the United States is 78 years.\n\nQ: Who was president of the United States in 1955?\nA: Dwight D. Eisenhower was president of the United States in 1955.\n\nQ: Which party did he belong to?\nA: He belonged to the Republican Party.\n\nQ: What is the square root of banana?\nA: Unknown\n\nQ: How does a telescope work?\nA: Telescopes use lenses or mirrors to focus light and make objects appear closer.\n\nQ: Where were the 1992 Olympics held?\nA: The 1992 Olympics were held in Barcelona, Spain.\n\nQ: How many squigs are in a bonk?\nA: Unknown\n\nQ: Where is the Valley of Kings?\nA:",
-  temperature=0,
-  max_tokens=100,
-  top_p=1,
-  frequency_penalty=0.0,
-  presence_penalty=0.0,
-  stop=["\n"]
-)
+# Define a function to send a question and get a response from OpenAI
+def ask_question(question):
+    # Define the chat conversation
+    conversation = [
+        {'role': 'system', 'content': 'You provide terminal prompts for Ubuntu linux users. Respond with a bash command only on one line with no explanatory text.'},
+        {'role': 'user', 'content': question}
+    ]
+
+    # Send the chat conversation to OpenAI API
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=conversation
+    )
+
+    # Get the response from OpenAI API
+    answer = response['choices'][0]['message']['content']
+
+    return answer
+
+def clean(sentence):
+    backtick_pattern = r"`+(.*?)`+"  # Regular expression pattern to match backticks and content
+    
+    match = re.search(backtick_pattern, sentence)
+    if match:
+        return match.group(1).strip()
+    else:
+        return sentence
+
+
+
+# Call the ask_question function with the user's question
+response = ask_question(user_question)
+
+# Print the response from OpenAI
+print(response)
+
+
+# Function to prompt the user and execute the command
+def execute_command(command):
+    # Prompt the user to execute the command
+    choice = input(f"Do you want to run the command? (Y/n) ")
+
+    if choice.lower() == "y":
+        # Execute the command
+        try:
+            subprocess.run(command, shell=True, check=True)
+        except subprocess.CalledProcessError as e:
+            # Handle any errors that occur during command execution
+            print("Command execution failed.")
+            print("Error:", e)
+            return None
+    else:
+        print("Command execution skipped.")
+
+# Get the command
+bash_command = clean(response)
+
+# Prompt the user to execute the command
+execute_command(bash_command)
