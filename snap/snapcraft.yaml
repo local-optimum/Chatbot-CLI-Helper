@@ -7,7 +7,7 @@ description: |
   These prompts are then copied to your clipboard to paste and run.
   Users will need their own OpenAI API key to use this tool (requests at scale are not cheap!)
 
-grade: devel # must be 'stable' to release into candidate/stable channels
+grade: stable # must be 'stable' to release into candidate/stable channels
 confinement: strict # use 'strict' once you have the right plugs and slots
 
 parts:
