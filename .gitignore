@@ -160,4 +160,4 @@ cython_debug/
 #.idea/
 
 # Personal stuff
-apikey.py
+api_key.json

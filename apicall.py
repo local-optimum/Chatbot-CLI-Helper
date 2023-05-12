@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
 
 import openai
-from apikey import key
 import sys
-import subprocess
 import re
-import pyperclip
+import subprocess
+import getpass
+import json
 
 # Get the text following the bash command
 command_output = ' '.join(sys.argv[1:])
 
 # Save the command output as a variable
 user_question = command_output
-
-openai.api_key = key
 
 # Define a function to send a question and get a response from OpenAI
 def ask_question(question):
@@ -44,36 +42,47 @@ def clean(sentence):
         return sentence
 
 
+#API key check
+API_KEY_FILE = 'api_key.json'
 
-# Call the ask_question function with the user's question
-response = ask_question(user_question)
-pyperclip.copy(str(clean(response)))
+#Prompt the user for their OpenAI API key
+def get_api_key():
+    print("To use this tool you need to have an OpenAI API key, create one at https://platform.openai.com/account/api-keys")
+    api_key = getpass.getpass('Enter your OpenAI API key: ')
+    with open(API_KEY_FILE, 'w') as f:
+        json.dump({'api_key': api_key}, f)
+    return api_key
 
-# Print the response from OpenAI
-print(clean(response))
-print("Command copied to clipboard")
+#Load an API key that has already been submitted
+def load_api_key():
+    try:
+        with open(API_KEY_FILE, 'r') as f:
+            data = json.load(f)
+            return data['api_key']
+    except (FileNotFoundError, KeyError):
+        return None
 
+#Primary query being run
+def run_query():
+    api_key = load_api_key()
+    if api_key is None:
+        api_key = get_api_key()
+    
+    # Use the API key to make your OpenAI queries here
+    openai.api_key = api_key
+    response = ask_question(user_question)
+    
+    #Print a tidied version of the response
+    print(clean(response))
+    
+    #Save the output of the cleaned response
+    output = str(clean(response))
 
+    # Copy the output to the clipboard using xclip
+    subprocess.run(['echo', output], stdout=subprocess.PIPE, shell=True)
+    subprocess.run(['xclip', '-selection', 'clipboard'], input=output.encode('utf-8'), check=True)
 
-# Function to prompt the user and execute the command
-def execute_command(command):
-    # Prompt the user to execute the command
-    choice = input(f"Do you want to run the command? (Y/n) ")
+    print("Command copied to clipboard")
 
-    if choice.lower() == "y":
-        # Execute the command
-        try:
-            subprocess.run(command, shell=True, check=True)
-        except subprocess.CalledProcessError as e:
-            # Handle any errors that occur during command execution
-            print("Command execution failed.")
-            print("Error:", e)
-            return None
-    else:
-        print("Command execution skipped.")
-
-# Get the command
-# bash_command = clean(response)
-
-# Prompt the user to execute the command
-# execute_command(bash_command)
+#Run the file!
+run_query()

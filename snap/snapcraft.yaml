@@ -1,0 +1,34 @@
+name: chatcli # you probably want to 'snapcraft register <name>'
+base: core22 # the base snap is the execution environment for this snap
+version: '0.1' # just for humans, typically '1.2+git' or '1.3.2'
+summary: A ChatGPT based command line helper # 79 char long summary
+description: |
+  This terminal app converts natural language commands into Ubuntu terminal prompts.
+  These prompts are then copied to your clipboard to paste and run.
+  Users will need their own OpenAI API key to use this tool (requests at scale are not cheap!)
+
+grade: devel # must be 'stable' to release into candidate/stable channels
+confinement: strict # use 'strict' once you have the right plugs and slots
+
+parts:
+  chatcli:
+    plugin: python
+    source: .
+    source-type: local
+    stage-packages:
+      - xclip
+
+    python-requirements: [requirements.txt]
+
+    build-packages:
+      - python3-setuptools
+
+    override-build: |
+      snapcraftctl build
+      cp $SNAPCRAFT_PROJECT_DIR/apicall.py $SNAPCRAFT_PART_INSTALL/bin/
+
+apps:
+  chatcli:
+    command: bin/python3 $SNAP/bin/apicall.py
+    plugs:
+      - home
