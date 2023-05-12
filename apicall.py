@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
-import os
 import openai
 from apikey import key
 import sys
 import subprocess
 import re
+import pyperclip
 
 # Get the text following the bash command
 command_output = ' '.join(sys.argv[1:])
@@ -47,9 +47,12 @@ def clean(sentence):
 
 # Call the ask_question function with the user's question
 response = ask_question(user_question)
+pyperclip.copy(str(clean(response)))
 
 # Print the response from OpenAI
-print(response)
+print(clean(response))
+print("Command copied to clipboard")
+
 
 
 # Function to prompt the user and execute the command
@@ -70,7 +73,7 @@ def execute_command(command):
         print("Command execution skipped.")
 
 # Get the command
-bash_command = clean(response)
+# bash_command = clean(response)
 
 # Prompt the user to execute the command
-execute_command(bash_command)
+# execute_command(bash_command)
