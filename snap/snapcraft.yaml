@@ -32,3 +32,4 @@ apps:
     command: bin/python3 $SNAP/bin/apicall.py
     plugs:
       - home
+      - network
