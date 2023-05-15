@@ -74,26 +74,38 @@ def load_api_key():
         return None
 
 #Primary query being run
+# Use the API key to make your OpenAI queries here
 def run_query():
     api_key = load_api_key()
     if api_key is None:
         api_key = get_api_key()
-    
+
+    if api_key is None:
+        print("API key not provided or valid. Exiting...")
+        return
+
     # Use the API key to make your OpenAI queries here
     openai.api_key = api_key
-    response = ask_question(user_question)
-    
-    #Print a tidied version of the response
-    print(clean(response))
-    
-    #Save the output of the cleaned response
-    output = str(clean(response))
+    try:
+        response = ask_question(user_question)
 
-    # Copy the output to the clipboard using xclip
-    subprocess.run(['echo', output], stdout=subprocess.PIPE, shell=True)
-    subprocess.run(['xclip', '-selection', 'clipboard'], input=output.encode('utf-8'), check=True)
+        # Print a tidied version of the response
+        print(clean(response))
 
-    print("Command copied to clipboard")
+        # Save the output of the cleaned response
+        output = str(clean(response))
 
+        # Copy the output to the clipboard using xclip
+        subprocess.run(['echo', output], stdout=subprocess.PIPE, shell=True)
+        subprocess.run(['xclip', '-selection', 'clipboard'], input=output.encode('utf-8'), check=True)
+
+        print("Command copied to clipboard")
+    except openai.error.AuthenticationError:
+        print("The API key has returned an authentication error. Replacing the API key file.")
+        get_api_key()
+        run_query()
+    except Exception as e:
+        print(f"An unexpected error occurred: {str(e)}")
+        
 #Run the file!
 run_query()
