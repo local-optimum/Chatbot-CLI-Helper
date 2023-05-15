@@ -27,11 +27,6 @@ parts:
       snapcraftctl build
       cp $SNAPCRAFT_PROJECT_DIR/apicall.py $SNAPCRAFT_PART_INSTALL/bin/
 
-plugs:
-  x11:
-    interface: x11
-    allow-x11: true
-
 apps:
   chatcli:
     command: bin/python3 $SNAP/bin/apicall.py
@@ -39,3 +34,4 @@ apps:
       - home
       - network
       - x11
+      - wayland
