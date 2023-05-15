@@ -30,10 +30,7 @@ parts:
 plugs:
   x11:
     interface: x11
-    x11-socket-protocols:
-      - x11
-      - wayland
-    target: $SNAP
+    allow-x11: true
 
 apps:
   chatcli:
