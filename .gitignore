@@ -162,3 +162,4 @@ cython_debug/
 # Personal stuff
 api_key.json
 chatcli_0.1_amd64.snap
+chatcli_0.2_amd64.snap

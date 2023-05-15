@@ -1,6 +1,6 @@
 name: chatcli # you probably want to 'snapcraft register <name>'
 base: core22 # the base snap is the execution environment for this snap
-version: '0.1' # just for humans, typically '1.2+git' or '1.3.2'
+version: '0.2' # just for humans, typically '1.2+git' or '1.3.2'
 summary: A ChatGPT based command line helper # 79 char long summary
 description: |
   This terminal app converts natural language commands into Ubuntu terminal prompts.
@@ -27,9 +27,18 @@ parts:
       snapcraftctl build
       cp $SNAPCRAFT_PROJECT_DIR/apicall.py $SNAPCRAFT_PART_INSTALL/bin/
 
+plugs:
+  x11:
+    interface: x11
+    x11-socket-protocols:
+      - x11
+      - wayland
+    target: $SNAP
+
 apps:
   chatcli:
     command: bin/python3 $SNAP/bin/apicall.py
     plugs:
       - home
       - network
+      - x11
