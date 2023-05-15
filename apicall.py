@@ -47,11 +47,22 @@ API_KEY_FILE = 'api_key.json'
 
 #Prompt the user for their OpenAI API key
 def get_api_key():
-    print("To use this tool you need to have an OpenAI API key, create one at https://platform.openai.com/account/api-keys")
-    api_key = getpass.getpass('Enter your OpenAI API key: ')
-    with open(API_KEY_FILE, 'w') as f:
-        json.dump({'api_key': api_key}, f)
-    return api_key
+    print("To use this tool, you need to have an OpenAI API key. Create one at https://platform.openai.com/account/api-keys")
+    while True:
+        api_key = getpass.getpass('Enter your OpenAI API key: ')
+        # Validate the API key by making a test request
+        openai.api_key = api_key
+        try:
+            response = ask_question(user_question)
+            # API key is valid, save it to a file
+            with open(API_KEY_FILE, 'w') as f:
+                json.dump({'api_key': api_key}, f)
+            return api_key
+        except openai.error.AuthenticationError:
+            print("The API key provided is not recognized. Please try again.")
+        except Exception as e:
+            print(f"An unexpected error occurred: {str(e)}")
+            return None
 
 #Load an API key that has already been submitted
 def load_api_key():
