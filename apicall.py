@@ -6,6 +6,7 @@ import re
 import subprocess
 import getpass
 import json
+import os
 
 # Get the text following the bash command
 command_output = ' '.join(sys.argv[1:])
@@ -44,6 +45,10 @@ def clean(sentence):
 
 #API key check
 API_KEY_FILE = 'api_key.json'
+if os.environ.get("SNAP_USER_COMMON"):
+    API_KEY_FILE = os.path.join(os.environ['SNAP_USER_COMMON'], 'api_key.json')
+else:
+    API_KEY_FILE = 'api_key.json'
 
 #Prompt the user for their OpenAI API key
 def get_api_key():
